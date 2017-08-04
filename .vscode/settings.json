@@ -4,5 +4,6 @@
         "--load-plugins",
         "pylint_django"
     ],
-    "python.linting.pylintEnabled": false
+    "python.linting.pylintEnabled": false,
+    "python.formatting.provider": "yapf"
 }
