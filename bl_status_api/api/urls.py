@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from . import views
 
 urlpatterns = [
@@ -7,4 +7,5 @@ urlpatterns = [
     url(r'^status-count/$', views.status_count, name='status_count'),
     url(r'^find-one-by-pattern/$', views.find_one_by_pattern, name='find_one_by_pattern'),
     url(r'^find-many-by-pattern/$', views.find_many_by_pattern, name='find_many_by_pattern'),
+    url(r'^docs/', include('rest_framework_docs.urls')),
 ]
