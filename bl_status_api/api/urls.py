@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^delete-one-by-pattern/$', views.delete_one_by_pattern, name='delete_one_by_pattern'),
     url(r'^delete-many-by-pattern/$', views.delete_many_by_pattern, name='delete_many_by_pattern'),
     url(r'^docs/', include('rest_framework_docs.urls')),
+    url(r'^', views.root),             # default route
 ]
