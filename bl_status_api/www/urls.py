@@ -3,6 +3,4 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.index),
-    url(r'^api/', include('api.urls')),
-    url(r'^', views.index),             # default route
 ]

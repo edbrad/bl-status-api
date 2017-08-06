@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from bson.objectid import ObjectId
 
 import re # Regular Expression support
-import ast # Literal Evaluation support (string to dictionary)
+import ast # Literal Evaluation support (e.g. string to dictionary)
 
 # Global variables
 mongo_server_connection = 'mongodb://172.16.168.110:27017/' # prod db server
