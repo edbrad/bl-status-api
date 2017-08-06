@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from bson import json_util
 from django.http import HttpResponse
-from bson.objectid import ObjectId
+from bson.objectid import ObjectId # For find-by-mongoID 
 
 import re # Regular Expression support
 import ast # Literal Evaluation support (e.g. string to dictionary)
@@ -36,10 +36,10 @@ def all_statuses(request):
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return JsonResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
 
     # Get all the status records in the database and return to client (w/ JSON Serialization)
     db = connection[database]
@@ -57,10 +57,10 @@ def status_count(request):
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
 
     # Get a count of the number of documents in the database and return to client
     db = connection[database]
@@ -79,23 +79,26 @@ def find_one_by_pattern(request):
     except Exception:
         pattern = ""
 
-    data = [] # JSON data array (query results)
+    data = [{}] # JSON data array (query results)
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
         data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        return Response(data)
 
     # Find a document database with the matching pattern and return to client (w/ JSON Serialization)
     db = connection[database]
     if (pattern != ""):
         data = json_util.dumps(db[collection].find_one({"pattern": pattern}))
+        if data == "null":
+            data = [{}]
     else:
         data = [{}]
 
     connection.close()
+    
     return HttpResponse(data, content_type='application/json')
 
 # Find/Get Multiple Documents By Partial Pattern Code
@@ -109,24 +112,27 @@ def find_many_by_pattern(request):
     except Exception:
         pattern = ""
 
-    data = [] # JSON data array (query results)
+    data = [{}] # JSON data array (query results)
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
 
     # Find the documents in the database where the pattern starts with "x" and return to client (w/ JSON Serialization)
     db = connection[database]
     if (pattern != ""):
         search_pattern = "^" + pattern
         data = json_util.dumps(db[collection].find({ "pattern": re.compile(search_pattern, re.IGNORECASE)}))
+        if data == "null":
+            data = [{}]
     else:
         data = [{}]
 
     connection.close()
+
     return HttpResponse(data, content_type='application/json')
 
 # Delete A Single Document By Pattern Code
@@ -141,14 +147,14 @@ def delete_one_by_pattern(request):
     except Exception:
         pattern = ""
 
-    data = "" #  result object
+    data = {} #  result object
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
 
     # Delete a single document database with the matching pattern code and return a result object to client
     db = connection[database]
@@ -156,9 +162,10 @@ def delete_one_by_pattern(request):
         delete_result  = db[collection].delete_one({"pattern": pattern})
         data = delete_result.raw_result
     else:
-        data = ""
+        data = {}
 
     connection.close()
+
     return Response(data)
 
 # Delete All Matching Documents By A Partial Pattern Code
@@ -172,14 +179,14 @@ def delete_many_by_pattern(request):
     except Exception:
         pattern = ""
 
-    data = "" #  result object
+    data = {} #  result object
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
 
     # Delete the documents in the database where the pattern code starts with "x" 
     db = connection[database]
@@ -188,9 +195,10 @@ def delete_many_by_pattern(request):
         delete_result = db[collection].delete_many({ "pattern": re.compile(search_pattern, re.IGNORECASE)})
         data = delete_result.raw_result
     else:
-        data = ""
+        data = {}
 
     connection.close()
+
     return Response(data)
 
 # Insert A Single New Status Document
@@ -204,21 +212,21 @@ def insert_one(request):
     except Exception:
         status_data = ""
 
-    id = "" # new id
+    id = {} # new id
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
     
     # Insert the new document
     db = connection[database]
     if (status_data != ""):
         id = json_util.dumps(db[collection].insert_one(status_data).inserted_id)
     else:
-        id = ""
+        id = {}
     
     connection.close()
 
@@ -228,7 +236,6 @@ def insert_one(request):
 
     return Response({'inserted_id': oid })
     
-
 # Insert Many New Status Documents
 @api_view(['POST'])
 def insert_many(request):
@@ -244,10 +251,10 @@ def insert_many(request):
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
     
     # Insert the new documents
     db = connection[database]
@@ -273,30 +280,26 @@ def update_one(request):
     Update a Single Status Document and Return a Result Object
     """
     try:
-        status_data = request.data
+        update_id = request.data['update_id']
+        update_data = request.data['update_data']
     except Exception:
-        status_data = ""
-
-    update_id = status_data['update_id']
-    update_data = status_data['update_data']
-
-    print(update_id)
-    print(update_data)
+        update_id = ""
+        update_data = ""
 
     # Verify the connection
     try:
-        connection = MongoClient(mongo_server_connection, serverSelectionTimeoutMS=30)
+        connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
-        return HttpResponse(data, content_type='application/json')
+        data = [{"database error":' + e + '}]
+        return Response(data)
     
     # Update the document and return the Result Object
     db = connection[database]
-    if (status_data != ""):
+    if ((update_id != "") and (update_data != "")):
         update_object = db[collection].update_one({'_id' : ObjectId(str(update_id))}, {'$set': update_data}, upsert=False)
-        print(update_object.raw_result)
     else:
-        ids = ""
+        update_object = {}
     
     connection.close()
+
     return Response(update_object.raw_result)
