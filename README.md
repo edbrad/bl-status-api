@@ -10,6 +10,10 @@ The Box Loading Status system **API** provides an interface for external apps to
 ```
 $ git clone https://github.com/edbrad/bl-status-api.git
 ```
+### Install dependencies (Django, REST Framework, etc...):
+```
+$ pip install -r requirements.txt
+```
 ### Reference links:
 
 https://luxagraf.net/src/how-set-django-uwsgi-systemd-debian-8
