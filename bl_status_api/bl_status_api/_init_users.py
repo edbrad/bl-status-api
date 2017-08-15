@@ -3,6 +3,8 @@ from passlib.hash import pbkdf2_sha256
 from pymongo import MongoClient
 from bson import json_util
 import jwt
+import pprint
+import json
 
 """
 Initialize bl-status user database
@@ -23,7 +25,7 @@ users = [
     {
         "username" : "admin",
         "password" : "set@pass1",
-        "roles" : ["Admin"]
+        "roles" : ["Administrator"]
     },
     {
         "username" : "sampleroom",
@@ -34,6 +36,11 @@ users = [
         "username" : "accounting",
         "password" : "set@pass1",
         "roles" : ["Accounting"]
+    },
+    {
+        "username" : "dropshipping",
+        "password" : "set@pass1",
+        "roles" : ["Dropshipping"]
     }
 ]
 
@@ -43,6 +50,23 @@ for user in users:
     print("[BEFORE]: " + "user: " + user["username"] + " password: " + user["password"])
     user["password"] = pbkdf2_sha256.encrypt(user["password"], rounds=200000, salt_size=16)
     print(" [AFTER]: " + "user: " + user["username"] + " password: " + user["password"] + "\n")
+
+# Delete ALL existing users
+print("Delete Existing Users:\n")
+result = ""
+
+# verify the connection
+try:
+    connection = MongoClient(mongo_server_connection)
+except Exception as e:
+    print("database error: " + e)
+
+db = connection[database] 
+result = db.drop_collection(collection)
+print("Delete Result: " + json.dumps(result))
+connection.close()
+
+print("\n")
 
 # Store Users in database
 print("Store Users in Database:\n")
