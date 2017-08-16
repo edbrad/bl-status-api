@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.root),
+    url(r'^authenticate/$', views.authenticate, name='authenticate'),
     url(r'^all-statuses/$', views.all_statuses, name='all_statuses'),
     url(r'^status-count/$', views.status_count, name='status_count'),
     url(r'^find-one-by-pattern/$', views.find_one_by_pattern, name='find_one_by_pattern'),

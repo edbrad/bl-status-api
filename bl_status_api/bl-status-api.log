@@ -1,0 +1,49 @@
+2017-08-16 18:03:26,976 - api.views - INFO - Authentication: 
+2017-08-16 18:18:48,880 - api.views - INFO - Authentication: 
+2017-08-16 18:22:44,549 - api.views - INFO - Authentication: 
+2017-08-16 18:26:56,018 - api.views - INFO - Authentication: 
+2017-08-16 18:28:23,382 - api.views - INFO - Authentication: 
+2017-08-16 18:30:38,318 - api.views - INFO - Authentication: 
+2017-08-16 18:59:28,833 - api.views - INFO - Authentication: 
+2017-08-16 19:01:42,795 - api.views - INFO - Authentication: 
+2017-08-16 19:04:10,748 - api.views - INFO - Authentication: 
+2017-08-16 22:44:56,076 - api.views - INFO - Authentication: 
+2017-08-16 22:44:56,078 - api.views - INFO - Authentication: request: {"password": "set@pass1", "username": "admin"}
+2017-08-16 22:44:56,235 - api.views - INFO - Authentication successful: admin
+2017-08-16 22:53:07,125 - api.views - INFO - Authentication processing...
+2017-08-16 22:53:07,127 - api.views - INFO - Authentication: request: {"password": "set@pass1", "username": "admin"}
+2017-08-16 22:53:07,291 - api.views - INFO - Authentication successful for: admin
+2017-08-16 22:53:54,066 - api.views - INFO - Authentication processing...
+2017-08-16 22:53:54,068 - api.views - INFO - Authentication: request: {"password": "set@pass2", "username": "admin"}
+2017-08-16 22:53:54,237 - api.views - INFO - Authentication error: JWT token generation error: Invalid password
+2017-08-16 22:54:24,599 - api.views - INFO - Authentication processing...
+2017-08-16 22:54:24,599 - api.views - INFO - Authentication error: Missing username/password "'username'"
+2017-08-16 22:54:52,626 - api.views - INFO - Authentication processing...
+2017-08-16 22:54:52,626 - api.views - INFO - Authentication error: Missing username/password "'username'"
+2017-08-16 22:56:02,622 - api.views - INFO - Authentication processing...
+2017-08-16 22:56:02,625 - api.views - INFO - Authentication: request: {"password": "abc", "username": "edb"}
+2017-08-16 22:56:02,628 - api.views - INFO - Authentication error: User does not exist
+2017-08-16 22:57:49,365 - api.views - INFO - Authentication processing...
+2017-08-16 22:57:49,367 - api.views - INFO - Authentication: request: {"password": "abc", "username": "admin"}
+2017-08-16 22:57:49,528 - api.views - INFO - Authentication error: JWT token generation error: Invalid password
+2017-08-16 23:00:22,964 - api.views - INFO - Authentication processing...
+2017-08-16 23:00:22,965 - api.views - INFO - Authentication: request: {"password": "set@pass1", "username": "admin"}
+2017-08-16 23:00:23,146 - api.views - INFO - Authentication successful for: admin
+2017-08-16 23:12:16,848 - api.views - INFO - Authentication processing...
+2017-08-16 23:12:16,851 - api.views - INFO - Authentication error: Missing username/password "'username'"
+2017-08-16 23:22:44,592 - api.views - INFO - authenticate Request
+2017-08-16 23:22:44,592 - api.views - INFO - Authentication processing...
+2017-08-16 23:22:44,592 - api.views - INFO - Authentication error: Missing username/password "'username'"
+2017-08-16 23:26:04,510 - api.views - INFO - authenticate Request
+2017-08-16 23:26:04,510 - api.views - INFO - Authentication processing...
+2017-08-16 23:26:04,511 - api.views - INFO - Authentication: request: {"password": "set@pass1", "username": "admin"}
+2017-08-16 23:26:04,663 - api.views - INFO - Authentication successful for: admin
+2017-08-16 23:30:19,461 - api.views - INFO - status_count Request
+2017-08-16 23:32:54,136 - api.views - INFO - root Request
+2017-08-16 23:33:15,160 - api.views - INFO - authenticate Request
+2017-08-16 23:33:15,161 - api.views - INFO - Authentication processing...
+2017-08-16 23:33:15,161 - api.views - INFO - Authentication error: Missing username "'username'"
+2017-08-16 23:38:50,353 - api.views - INFO - authenticate Request
+2017-08-16 23:38:50,353 - api.views - INFO - Authentication processing...
+2017-08-16 23:38:50,355 - api.views - INFO - Authentication: request: {"password": "set@pass1", "username": "admin"}
+2017-08-16 23:38:50,503 - api.views - INFO - Authentication successful for: admin
