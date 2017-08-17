@@ -47,3 +47,80 @@
 2017-08-16 23:38:50,353 - api.views - INFO - Authentication processing...
 2017-08-16 23:38:50,355 - api.views - INFO - Authentication: request: {"password": "set@pass1", "username": "admin"}
 2017-08-16 23:38:50,503 - api.views - INFO - Authentication successful for: admin
+2017-08-17 01:09:06,322 - api.views - INFO - Request: authenticate
+2017-08-17 01:09:06,324 - api.views - INFO - authentication processing...
+2017-08-17 01:09:06,326 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 01:09:06,500 - api.views - INFO - Authentication successful for: admin
+2017-08-17 01:13:46,554 - api.views - INFO - Request: authenticate
+2017-08-17 01:13:46,554 - api.views - INFO - authentication processing...
+2017-08-17 01:13:46,556 - api.views - INFO - Authentication: request: {"username": "admin2", "password": "set@pass1"}
+2017-08-17 01:13:46,584 - api.views - INFO - Authentication error: User does not exist
+2017-08-17 01:14:38,411 - api.views - INFO - Request: authenticate
+2017-08-17 01:14:38,411 - api.views - INFO - authentication processing...
+2017-08-17 01:14:38,412 - api.views - INFO - Authentication: request: {"username": "admin2", "password": "set@pass1"}
+2017-08-17 01:14:38,420 - api.views - INFO - Authentication error: User does not exist
+2017-08-17 02:31:07,864 - api.views - INFO - Request: authenticate
+2017-08-17 02:31:07,864 - api.views - INFO - authentication processing...
+2017-08-17 02:31:07,866 - api.views - INFO - Authentication: request: {"username": "admin2", "password": "set@pass1"}
+2017-08-17 02:31:07,871 - api.views - INFO - Authentication error: User does not exist
+2017-08-17 02:31:14,144 - api.views - INFO - Request: authenticate
+2017-08-17 02:31:14,144 - api.views - INFO - authentication processing...
+2017-08-17 02:31:14,147 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 02:31:14,320 - api.views - INFO - Authentication successful for: admin
+2017-08-17 03:09:20,160 - api.views - INFO - Request: authenticate
+2017-08-17 03:09:20,162 - api.views - INFO - authentication processing...
+2017-08-17 03:09:20,163 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 03:09:20,351 - api.views - INFO - Authentication successful for: admin
+2017-08-17 03:09:57,727 - api.views - INFO - Request: authenticate
+2017-08-17 03:09:57,727 - api.views - INFO - authentication processing...
+2017-08-17 03:09:57,729 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass2"}
+2017-08-17 03:09:57,895 - api.views - INFO - Authentication error: JWT token generation error: Invalid password
+2017-08-17 03:10:14,296 - api.views - INFO - Request: authenticate
+2017-08-17 03:10:14,296 - api.views - INFO - authentication processing...
+2017-08-17 03:10:14,298 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 03:10:14,486 - api.views - INFO - Authentication successful for: admin
+2017-08-17 03:12:03,198 - api.views - INFO - Request: authenticate
+2017-08-17 03:12:03,198 - api.views - INFO - authentication processing...
+2017-08-17 03:12:03,210 - api.views - INFO - Authentication error: Missing username 'username'
+2017-08-17 03:12:50,437 - api.views - INFO - Request: authenticate
+2017-08-17 03:12:50,437 - api.views - INFO - authentication processing...
+2017-08-17 03:12:50,437 - api.views - INFO - Authentication error: Missing username 'username'
+2017-08-17 03:13:40,883 - api.views - INFO - Request: authenticate
+2017-08-17 03:13:40,884 - api.views - INFO - authentication processing...
+2017-08-17 03:13:40,896 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 03:13:41,073 - api.views - INFO - Authentication successful for: admin
+2017-08-17 03:40:29,562 - api.views - INFO - Request: authenticate
+2017-08-17 03:40:29,562 - api.views - INFO - authentication processing...
+2017-08-17 03:40:29,572 - api.views - INFO - Authentication error: Missing username 'username'
+2017-08-17 03:42:03,995 - api.views - INFO - Request: authenticate
+2017-08-17 03:42:03,996 - api.views - INFO - authentication processing...
+2017-08-17 03:42:03,997 - api.views - INFO - Authentication: request: {"username": "admin", "password": "swet@[ass1"}
+2017-08-17 03:42:04,179 - api.views - INFO - Authentication error: JWT token generation error: Invalid password
+2017-08-17 03:42:40,485 - api.views - INFO - Request: authenticate
+2017-08-17 03:42:40,485 - api.views - INFO - authentication processing...
+2017-08-17 03:42:40,486 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 03:42:40,643 - api.views - INFO - Authentication successful for: admin
+2017-08-17 16:13:41,215 - api.views - INFO - Request: authenticate
+2017-08-17 16:13:41,218 - api.views - INFO - authentication processing...
+2017-08-17 16:13:41,220 - api.views - INFO - Authentication: request: {"username": "sdsd", "password": "sdsdds"}
+2017-08-17 16:13:41,229 - api.views - INFO - Authentication error: User does not exist
+2017-08-17 16:14:09,618 - api.views - INFO - Request: authenticate
+2017-08-17 16:14:09,619 - api.views - INFO - authentication processing...
+2017-08-17 16:14:09,620 - api.views - INFO - Authentication: request: {"username": "dsff", "password": "dsfdf"}
+2017-08-17 16:14:09,626 - api.views - INFO - Authentication error: User does not exist
+2017-08-17 16:15:46,612 - api.views - INFO - Request: authenticate
+2017-08-17 16:15:46,613 - api.views - INFO - authentication processing...
+2017-08-17 16:15:46,615 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 16:15:46,782 - api.views - INFO - Authentication successful for: admin
+2017-08-17 16:17:15,129 - api.views - INFO - Request: authenticate
+2017-08-17 16:17:15,129 - api.views - INFO - authentication processing...
+2017-08-17 16:17:15,130 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 16:17:15,305 - api.views - INFO - Authentication successful for: admin
+2017-08-17 16:21:34,091 - api.views - INFO - Request: authenticate
+2017-08-17 16:21:34,091 - api.views - INFO - authentication processing...
+2017-08-17 16:21:34,092 - api.views - INFO - Authentication: request: {"username": "sdsd", "password": "sdsd"}
+2017-08-17 16:21:34,116 - api.views - INFO - Authentication error: User does not exist
+2017-08-17 16:21:44,413 - api.views - INFO - Request: authenticate
+2017-08-17 16:21:44,413 - api.views - INFO - authentication processing...
+2017-08-17 16:21:44,414 - api.views - INFO - Authentication: request: {"username": "admin", "password": "set@pass1"}
+2017-08-17 16:21:44,571 - api.views - INFO - Authentication successful for: admin

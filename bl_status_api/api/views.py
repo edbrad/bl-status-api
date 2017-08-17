@@ -7,10 +7,10 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from bson import json_util
 from django.http import HttpResponse
-from bson.objectid import ObjectId # For find-by-mongoID
+from bson.objectid import ObjectId # MongoDB native _id parsing support
 #
-import re # Regular Expression support
-import ast # Literal Evaluation support (e.g. string to dictionary)
+import re # regular expression support
+import ast # literal evaluation support (e.g. string to dictionary)
 #
 from datetime import datetime, timedelta
 from passlib.hash import pbkdf2_sha256
@@ -47,7 +47,7 @@ def root(request):
     """
     Return Generic/Default Welcome Text Response.
     """
-    logger.info("root Request")
+    logger.info("Request: root")
 
     data = 'Welcome to the EMS bl-status REST API. Unauthorized Access is Prohibited. 2017 - Executive Mailing Service'
     return HttpResponse(data)
@@ -58,7 +58,7 @@ def all_statuses(request):
     """
     Return All Status Documents
     """
-    logger.info("all_statuses Request")
+    logger.info("Request: all_statuses")
 
     data = [] # JSON data array (query results)
 
@@ -66,7 +66,7 @@ def all_statuses(request):
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
 
     # get all the status records in the database and return to client (w/ JSON Serialization)
@@ -81,7 +81,7 @@ def status_count(request):
     """
     Return Current Status Document (Record) Count
     """
-    logger.info("status_count Request")
+    logger.info("Request: status_count")
 
     data = [] # JSON data array (query results)
 
@@ -89,7 +89,7 @@ def status_count(request):
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
 
     # get a count of the number of documents in the database and return to client
@@ -104,7 +104,7 @@ def find_one_by_pattern(request):
     """
     Find and Return a Single Status Document by Pattern Code (9999-99X)
     """
-    logger.info("find_one_by_pattern Request")
+    logger.info("Request: find_one_by_pattern")
 
     try:
         pattern = request.GET['pattern']  # pattern to search for
@@ -117,7 +117,7 @@ def find_one_by_pattern(request):
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = '[{"database error":' + e + '}]'
+        data = [{"database error": str(e)}]
         return Response(data)
 
     # find a document database with the matching pattern and return to client (w/ JSON Serialization)
@@ -139,7 +139,7 @@ def find_many_by_pattern(request):
     """
     Find and Return Multiple Status Documents by Partial Pattern Code (999*)
     """
-    logger.info("find_many_by_pattern Request")
+    logger.info("Request: find_many_by_pattern")
 
     try:
         pattern = request.GET['pattern']  # pattern to search for
@@ -152,7 +152,7 @@ def find_many_by_pattern(request):
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
 
     # find the documents in the database where the pattern starts with "x" and return to client (w/ JSON Serialization)
@@ -175,20 +175,20 @@ def delete_one_by_pattern(request):
     """
     Delete a Single Status Document by Pattern Code (9999-99X) and Return a Result Object
     """
-    logger.info("delete_one_by_pattern Request")
+    logger.info("Request: delete_one_by_pattern")
 
     try:
         pattern = request.GET['pattern']  # pattern code to search for
     except Exception:
         pattern = ""
 
-    data = {} #  result object
+    data = {} # result object
 
     # verify the connection
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
 
     # delete a single document database with the matching pattern code and return a result object to client
@@ -209,20 +209,20 @@ def delete_many_by_pattern(request):
     """
     Delete All Documents by a Partial Pattern Code (999*) and Return a Result Object
     """
-    logger.info("delete_many_by_pattern Request")
+    logger.info("Request: delete_many_by_pattern")
 
     try:
         pattern = request.GET['pattern']  # pattern to delete by
     except Exception:
         pattern = ""
 
-    data = {} #  result object
+    data = {} # result object
 
     # verify the connection
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
 
     # delete the documents in the database where the pattern code starts with "x" 
@@ -244,7 +244,7 @@ def insert_one(request):
     """
     Insert a Single New Status Document and Return the New id
     """
-    logger.info("insert_one Request")
+    logger.info("Request: insert_one")
     
     try:
         status_data = request.data
@@ -257,7 +257,7 @@ def insert_one(request):
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
     
     # insert the new document
@@ -281,7 +281,7 @@ def insert_many(request):
     """
     Insert Many New Status Documents and Return an Array of the New id's
     """
-    logger.info("insert_many Request")
+    logger.info("Request: insert_many")
 
     try:
         status_data = request.data
@@ -294,7 +294,7 @@ def insert_many(request):
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
     
     # insert the new documents
@@ -320,7 +320,7 @@ def update_one(request):
     """
     Update a Single Status Document and Return a Result Object
     """
-    logger.info("update_one Request")
+    logger.info("Request: update_one")
 
     try:
         update_id = request.data['update_id']
@@ -333,7 +333,7 @@ def update_one(request):
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
-        data = [{"database error":' + e + '}]
+        data = [{"database error": str(e)}]
         return Response(data)
     
     # update the document and return the Result Object
@@ -348,21 +348,20 @@ def update_one(request):
     return Response(update_object.raw_result)
 
 # Verify User Name in the Database and Verify the Password, & Return Authentication Token
-@api_view(['GET'])
+@api_view(['POST'])
 def authenticate(request):
     """
-    Verify User Name in the Database and Verify the 
-    Password, & Return Authentication Token
+    Verify User Name in the Database and Verify the Password, & Return Authentication Token
     """
-    logger.info("authenticate Request")
+    logger.info("Request: authenticate")
 
     user = {} # user document (from database)
     data = {} # response object - returned to client
     
-    logger.info("Authentication processing...")
+    logger.info("authentication processing...")
     try:
         request_username = ""
-        request_username = request.GET["username"] 
+        request_username = request.data["username"] 
     except Exception as e:
         data = {
             "success": False,
@@ -375,7 +374,7 @@ def authenticate(request):
 
     try:
         request_password = ""
-        request_password = request.GET["password"]
+        request_password = request.data["password"]
     except Exception as e:
         data = {
             "success": False,
@@ -400,16 +399,14 @@ def authenticate(request):
         return Response(data)
 
     # find the user name and verify the password
-    print("Authentication: request: " + json_util.dumps(request.GET))
-    logger.info("Authentication: request: " + json_util.dumps(request.GET))
-    if (request.GET["username"]):
+    logger.info("Authentication: request: " + json_util.dumps(request.data))
+    if (request.data["username"]):
         db = connection[database]
-        user = db[user_collection].find_one({"username": request.GET["username"]})
+        user = db[user_collection].find_one({"username": request.data["username"]})
 
     if(user):
-        print("user:  " + json_util.dumps(user))
-        # verify password againt hash
-        if (pbkdf2_sha256.verify(request.GET["password"], user["password"])):
+        # verify password against hash
+        if (pbkdf2_sha256.verify(request.data["password"], user["password"])):
             payload = {
                 "user_id": user["username"],
                 "exp": datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)
@@ -423,6 +420,7 @@ def authenticate(request):
                 "user": {""}
             }
             logger.info("Authentication error: JWT token generation error: Invalid password")
+            connection.close()
             return Response(data)
     else:
         data = {
@@ -432,9 +430,8 @@ def authenticate(request):
                 "user": {""}
         }
         logger.info("Authentication error: User does not exist")
+        connection.close()
         return Response(data)
-
-    connection.close()
 
     data = {
         "success": True,
@@ -446,4 +443,5 @@ def authenticate(request):
         }
     }
     logger.info("Authentication successful for: " + user['username'])
+    connection.close()
     return Response(data)
