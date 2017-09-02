@@ -26,11 +26,14 @@ mongo_server_connection = 'mongodb://172.16.168.110:27017/' # prod db server
 database = 'test_database' # test database
 collection = 'status_test' # test collection (table)
 user_collection = 'status_test_users' # test user collection (table)
+log_collection = 'status_test_log' # test log collection (table)
+file_cat_collection = 'status_test_file_cat' # test file catalog collection (table)
 
 # JWT (JSON Web Token) config variables
 JWT_SECRET = "#ThisIsASecret!"  # private encryption key
 JWT_ALGORITHM = "HS256"         # encryption algorithm
-JWT_EXP_DELTA_SECONDS = 3600    # token expiration time (in seconds)
+#JWT_EXP_DELTA_SECONDS = 3600    # token expiration time (in seconds)
+JWT_EXP_DELTA_SECONDS = 60    # token expiration time (in seconds)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -391,7 +394,7 @@ def authenticate(request):
     except Exception as e:
         data = {
             "success": False,
-            "message": "Database connection error",
+            "message": "Database connection error!",
             "token": "",
             "user": {""}
         }
@@ -415,7 +418,7 @@ def authenticate(request):
         else:
             data = {
                 "success": False,
-                "message": "JWT token generation error: Invalid password",
+                "message": "Invalid password!",
                 "token": "",
                 "user": {""}
             }
@@ -425,7 +428,7 @@ def authenticate(request):
     else:
         data = {
                 "success": False,
-                "message": "User does not exist",
+                "message": "User does not exist!",
                 "token": "",
                 "user": {""}
         }
@@ -445,3 +448,131 @@ def authenticate(request):
     logger.info("Authentication successful for: " + user['username'])
     connection.close()
     return Response(data)
+
+# Check an existing JWT token for expiration
+@api_view(['POST'])
+def check_token_exp(request):
+    """
+    Check an existing JWT token for expiration
+    """
+    logger.info("Request: check_token_exp")
+    logger.info("request: " + json_util.dumps(request.data))
+
+    user = request.data
+    data = {
+        "expired": ""
+    }
+    try:
+        logger.info("decode token: " + user["user"]["token"])
+        jwt.decode(user["user"]["token"], JWT_SECRET)
+        data["expired"] = False
+        return Response(data)
+    except jwt.ExpiredSignatureError:
+        data["expired"] = True
+        return Response(data)
+
+# Receive and store files from connected web clients 
+@api_view(['POST'])
+def file_upload(request):
+    """
+    Receive and store files from connected web clients 
+    """
+    logger.info("Request: file_upload")
+    logger.info("request: " + json_util.dumps(request.query_params))
+
+    # is there a file?
+    try:
+        file_data = request.data
+    except Exception:
+        file_data = ""
+
+    id = {} # new file cat id
+
+    # extract file parameters from url
+    pattern = request.GET['pattern'] 
+    file_type = request.GET['file_type'] 
+    user = request.GET['user'] 
+    client_file_path = request.GET['client_file_path'] 
+    server_file_path = request.GET['server_file_path'] 
+    file_post_date_time = request.GET['file_post_date_time']
+    download_count = request.GET['download_count']
+    replacement_count = request.GET['replacement_count']
+
+    cat_data = {
+        'pattern': pattern,
+        'fileType': file_type,
+        'user': user,
+        'serverFilePath': server_file_path,
+        'clientFilePath': client_file_path,
+        'filePostDateTime': file_post_date_time,
+        'downloadCount': download_count,
+        'replacementCount': replacement_count
+    }
+
+    # verify the connection
+    try:
+        connection = MongoClient(mongo_server_connection)
+    except Exception as e:
+        data = [{"database error": str(e)}]
+        return Response(data)
+    
+    # insert the new log document
+    db = connection[database]
+    if (file_data != ""):
+        # add the local stored path
+        cat_data["serverFilePath"] = "Server File Path Goes Here..."
+        # DB insert
+        id = json_util.dumps(db[file_cat_collection].insert_one(cat_data).inserted_id)
+    else:
+        id = {}
+    
+    connection.close()
+
+    # convert response to dictionary (for JSON response serialization)
+    id_dict = ast.literal_eval(id)
+    oid = id_dict['$oid']
+
+    return Response({'inserted_id': oid })
+
+
+# Receive and store logged events from connected web clients 
+@api_view(['POST'])
+def client_logs(request):
+    """
+    Receive and store logged events from connected web clients 
+    """
+    logger.info("Request: client_logs")
+    logger.info("request: " + json_util.dumps(request.data))
+    
+    try:
+        log_data = request.data
+        ip_address = request.META.get('REMOTE_ADDR', None)
+    except Exception:
+        log_data = ""
+
+    id = {} # new id
+
+    # verify the connection
+    try:
+        connection = MongoClient(mongo_server_connection)
+    except Exception as e:
+        data = [{"database error": str(e)}]
+        return Response(data)
+    
+    # insert the new log document
+    db = connection[database]
+    if (log_data != ""):
+        # add the source IP address
+        log_data["ipAddress"] = ip_address
+        # DB insert
+        id = json_util.dumps(db[log_collection].insert_one(log_data).inserted_id)
+    else:
+        id = {}
+    
+    connection.close()
+
+    # convert response to dictionary (for JSON response serialization)
+    id_dict = ast.literal_eval(id)
+    oid = id_dict['$oid']
+
+    return Response({'inserted_id': oid })

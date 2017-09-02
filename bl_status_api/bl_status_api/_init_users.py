@@ -25,7 +25,7 @@ users = [
     {
         "username" : "admin",
         "password" : "set@pass1",
-        "roles" : ["Administrator"]
+        "roles" : ["Administrator", "SampleRoom", "Accounting", "Dropshipping"]
     },
     {
         "username" : "sampleroom",
