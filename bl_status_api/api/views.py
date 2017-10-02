@@ -2,7 +2,13 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import renderers
 from rest_framework.decorators import parser_classes
+from rest_framework.decorators import renderer_classes
+from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import FormParser
+from rest_framework.views import APIView
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from bson import json_util
@@ -471,58 +477,66 @@ def check_token_exp(request):
         data["expired"] = True
         return Response(data)
 
-# Receive and store files from connected web clients 
+# Receive and store files from connected web clients
+# - define a custom renderer to handle PDF (Binary) data
+class PDFRenderer(renderers.BaseRenderer):
+    media_type = 'application/pdf'
+    format = 'pdf'
+    charset = None
+    render_style = 'binary'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        return data
+
+# - define the PDF file upload API endpoint
 @api_view(['POST'])
+@parser_classes((MultiPartParser, FormParser,)) # process/remove http header/footer data
+@renderer_classes((PDFRenderer,)) # render binary PDF data for storage
 def file_upload(request):
     """
     Receive and store files from connected web clients 
     """
     logger.info("Request: file_upload")
-    logger.info("request: " + json_util.dumps(request.query_params))
+    logger.info("File Upload MetaData: " + json_util.dumps(request.POST))
 
-    # is there a file?
-    try:
-        file_data = request.data
-    except Exception:
-        file_data = ""
-
-    id = {} # new file cat id
-
-    # extract file parameters from url
-    pattern = request.GET['pattern'] 
-    file_type = request.GET['file_type'] 
-    user = request.GET['user'] 
-    client_file_path = request.GET['client_file_path'] 
-    server_file_path = request.GET['server_file_path'] 
-    file_post_date_time = request.GET['file_post_date_time']
-    download_count = request.GET['download_count']
-    replacement_count = request.GET['replacement_count']
-
+    # extract file catalog metadata from the request (to be stored in database)
     cat_data = {
-        'pattern': pattern,
-        'fileType': file_type,
-        'user': user,
-        'serverFilePath': server_file_path,
-        'clientFilePath': client_file_path,
-        'filePostDateTime': file_post_date_time,
-        'downloadCount': download_count,
-        'replacementCount': replacement_count
+        'pattern': request.data['pattern'],
+        'fileType': request.data['fileType'],
+        'user': request.data['user'],
+        'serverFilePath': request.data['serverFilePath'],
+        'clientFilePath': request.data['clientFilePath'],
+        'filePostDateTime': request.data['filePostDateTime'],
+        'downloadCount': request.data['downloadCount'],
+        'replacementCount': request.data['replacementCount'],
     }
+    
+    # write uploaded file data to the local filesystem
+    handle_uploaded_file(request.data['file'], cat_data['clientFilePath']) 
 
-    # verify the connection
+    # verify the db connection
     try:
         connection = MongoClient(mongo_server_connection)
     except Exception as e:
         data = [{"database error": str(e)}]
         return Response(data)
     
-    # insert the new log document
+    # insert the new file catalog document & update Status file information
     db = connection[database]
-    if (file_data != ""):
+    if (request.data['file'] != ""):
         # add the local stored path
-        cat_data["serverFilePath"] = "Server File Path Goes Here..."
+        cat_data["serverFilePath"] = cat_data['clientFilePath']
         # DB insert
         id = json_util.dumps(db[file_cat_collection].insert_one(cat_data).inserted_id)
+        # update file information in Status document for the pattern
+        pt = cat_data['pattern']
+        fl = cat_data['clientFilePath']
+        us = cat_data['user']
+        tm = cat_data['filePostDateTime']
+        if (cat_data['fileType'] == "Pallet Tags"):
+            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletTagFile": fl, "palletTagFileUploadDateTime": tm, "palletTagFileUser": us, "palletTagFileDownloadCount": 8}})
+        else:
+            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletWorksheetFile": fl, "palletWorksheetFileUploadDateTime": tm,"palletWorksheetFileUser": us, "palletWorksheetFileDownloadCount": 0}})
     else:
         id = {}
     
@@ -532,8 +546,19 @@ def file_upload(request):
     id_dict = ast.literal_eval(id)
     oid = id_dict['$oid']
 
+    logger.info("File Upload id for: " + cat_data['clientFilePath'] + ": " + json_util.dumps({'inserted_id': oid }))
     return Response({'inserted_id': oid })
-
+    
+# - store the rendered data (PDF) in a file on the local file system
+def handle_uploaded_file(file, file_name):
+    logger.info("File Upload: writting file [ " + file_name + " ]...")
+    print("File Upload: writting file [ " + file_name + " ]...")
+    destination = open("uploaded_files/" + file_name, 'wb+')
+    for chunk in file.chunks():
+        destination.write(chunk)
+    destination.close()
+    logger.info("File Upload: file saved!")
+    print("File Upload: file saved!")
 
 # Receive and store logged events from connected web clients 
 @api_view(['POST'])
