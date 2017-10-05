@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^delete-many-by-pattern/$', views.delete_many_by_pattern, name='delete_many_by_pattern'),
     #url(r'^file-upload2/(?P<filename>[^/]+)$', views.file_upload2, name='file_upload2'),
     url(r'^file-upload/$', views.file_upload, name='file_upload'),
+    url(r'^file-delete/$', views.file_delete, name='file_delete'),
     url(r'^logs/$', views.client_logs, name='client_logs'),
     url(r'^docs/', include('rest_framework_docs.urls')),
 ]

@@ -26,6 +26,7 @@ import pprint
 import json
 #
 import logging
+import os
 
 # Global variables
 mongo_server_connection = 'mongodb://172.16.168.110:27017/' # prod db server
@@ -534,12 +535,21 @@ def file_upload(request):
         us = cat_data['user']
         tm = cat_data['filePostDateTime']
         if (cat_data['fileType'] == "Pallet Tags"):
-            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletTagFile": fl, "palletTagFileUploadDateTime": tm, "palletTagFileUser": us, "palletTagFileDownloadCount": 8}})
+            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletTagFile": fl, "palletTagFileUploadDateTime": tm, "palletTagFileUser": us, "palletTagFileDownloadCount": 0}})
         else:
             db[collection].update_many({"pattern": pt },{"$set":{"currentPalletWorksheetFile": fl, "palletWorksheetFileUploadDateTime": tm,"palletWorksheetFileUser": us, "palletWorksheetFileDownloadCount": 0}})
     else:
         id = {}
-    
+
+    # update status
+    data = db[collection].find_one({"pattern": pt })
+    # print ("update data: " + json_util.dumps(data))
+    if (data != "null"):
+        if ((data['currentPalletTagFile'] != "") and (data['currentPalletTagFile'] != " ") and (data['currentPalletWorksheetFile'] != "") and (data['currentPalletWorksheetFile'] != " ")): 
+            db[collection].update_many({"pattern": pt },{"$set":{"paperworkStatus": "Complete" }})
+        else:
+            db[collection].update_many({"pattern": pt },{"$set":{"paperworkStatus": "In Process" }})
+
     connection.close()
 
     # convert response to dictionary (for JSON response serialization)
@@ -601,3 +611,64 @@ def client_logs(request):
     oid = id_dict['$oid']
 
     return Response({'inserted_id': oid })
+
+# - define the PDF file delete API endpoint
+@api_view(['POST'])
+def file_delete(request):
+    """
+    Delete a given pattern's associated PDF file from server repository 
+    and update status document 
+    """
+    logger.info("Request: file_delete")
+    logger.info("File Delete MetaData: " + json_util.dumps(request.POST))
+
+    try:
+        pattern = request.data['pattern']
+        file_name = request.data['fileName']
+        file_type = request.data['fileType']
+    except Exception:
+        pattern = ""
+        file_name = ""
+        file_type = ""
+    
+    # verify the connection
+    try:
+        connection = MongoClient(mongo_server_connection)
+    except Exception as e:
+        data = [{"database error": str(e)}]
+        return Response(data)
+
+    # update the status document - PDF file information
+    db = connection[database]
+    if ((pattern != "") and (file_name != "") and (file_type != "")):
+        if (file_type == "Pallet Tags"):
+            update_object = db[collection].update_many({"pattern": pattern },{"$set":{"currentPalletTagFile": "", "palletTagReplacementCount": 0, "palletTagFileUploadDateTime": "", "palletTagFileUser": "", "palletTagFileDownloadCount": 0}})
+        else:
+            update_object = db[collection].update_many({"pattern": pattern },{"$set":{"currentPalletWorksheetFile": "", "palletWorksheetReplacementCount": 0, "palletWorksheetFileUploadDateTime": "", "palletWorksheetFileUser": "", "palletWorksheetFileDownloadCount": 0}})
+    else:
+        update_object = {}
+    
+    # update status document - Paperwork status
+    data = db[collection].find_one({"pattern": pattern })
+    if (data != "null"):
+        if ((data['currentPalletTagFile'] != "") and (data['currentPalletTagFile'] != " ") and (data['currentPalletWorksheetFile'] != "") and (data['currentPalletWorksheetFile'] != " ")): 
+            db[collection].update_many({"pattern": pattern },{"$set":{"paperworkStatus": "Complete" }})
+        else:
+            db[collection].update_many({"pattern": pattern },{"$set":{"paperworkStatus": "In Process" }})
+    
+    # remove metadata info from the file catalog
+    db[file_cat_collection].delete_many({"pattern": pattern, "serverFilePath": file_name, "fileType": file_type})
+
+    connection.close()
+
+    # delete the file from server folder
+    try:
+        if ((pattern != "") and (file_name != "") and (file_type != "")):
+            destination = "uploaded_files/" + file_name
+            os.remove(destination)
+            print("File: " + destination + " Deleted!")
+    except Exception as e:
+        data = [{"file deletion error": str(e)}]
+        return Response(data)
+
+    return Response(update_object.raw_result)
