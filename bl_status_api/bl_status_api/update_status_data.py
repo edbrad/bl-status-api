@@ -24,6 +24,7 @@ except Exception as e:
 db = connection[database]
 #data = json_util.dumps(db[collection].update_many({},{"$set":{"currentPalletTagFile": " ","palletTagFileUploadDateTime": "","palletTagFileUser": " ","palletTagFileDownloadCount": 0}}))
 #db[collection].update_many({},{"$set":{"currentPalletWorksheetFile": " ","palletWorksheetFileUploadDateTime": "","palletWorksheetFileUser": " ","palletWorksheetFileDownloadCount": 0}})
-db[collection].update_many({},{"$set":{"palletTagReplacementCount": 0, "palletWorksheetReplacementCount": 0}})
+#db[collection].update_many({},{"$set":{"palletTagReplacementCount": 0, "palletWorksheetReplacementCount": 0}})
+db[collection].update_many({},{"$set":{"postalAccountingNotes": ""}})
 
 connection.close()

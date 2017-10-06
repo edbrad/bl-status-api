@@ -357,6 +357,39 @@ def update_one(request):
 
     return Response(update_object.raw_result)
 
+# Update A Single Status Document
+@api_view(['PUT'])
+def update_many_by_pattern(request):
+    """
+    Update Status Document by Pattern and Return a Result Object
+    """
+    logger.info("Request: update_many_by_pattern")
+
+    try:
+        update_pattern = request.data['update_pattern']
+        update_data = request.data['update_data']
+    except Exception:
+        update_pattern = ""
+        update_data = ""
+
+    # verify the connection
+    try:
+        connection = MongoClient(mongo_server_connection)
+    except Exception as e:
+        data = [{"database error": str(e)}]
+        return Response(data)
+    
+    # update the document and return the Result Object
+    db = connection[database]
+    if ((update_pattern != "") and (update_data != "")):
+        update_object = db[collection].update_many({'pattern' : update_pattern}, {'$set': update_data}, upsert=False)
+    else:
+        update_object = {}
+    
+    connection.close()
+
+    return Response(update_object.raw_result)
+
 # Verify User Name in the Database and Verify the Password, & Return Authentication Token
 @api_view(['POST'])
 def authenticate(request):
@@ -534,10 +567,11 @@ def file_upload(request):
         fl = cat_data['clientFilePath']
         us = cat_data['user']
         tm = cat_data['filePostDateTime']
+        rc = cat_data['replacementCount']
         if (cat_data['fileType'] == "Pallet Tags"):
-            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletTagFile": fl, "palletTagFileUploadDateTime": tm, "palletTagFileUser": us, "palletTagFileDownloadCount": 0}})
+            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletTagFile": fl, "palletTagFileUploadDateTime": tm, "palletTagFileUser": us, "palletTagFileDownloadCount": 0, "palletTagReplacementCount": rc}})
         else:
-            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletWorksheetFile": fl, "palletWorksheetFileUploadDateTime": tm,"palletWorksheetFileUser": us, "palletWorksheetFileDownloadCount": 0}})
+            db[collection].update_many({"pattern": pt },{"$set":{"currentPalletWorksheetFile": fl, "palletWorksheetFileUploadDateTime": tm,"palletWorksheetFileUser": us, "palletWorksheetFileDownloadCount": 0, "palletWorksheetReplacementCount": rc}})
     else:
         id = {}
 

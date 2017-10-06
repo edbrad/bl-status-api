@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^insert-one/$', views.insert_one, name='insert_one'),
     url(r'^insert-many/$', views.insert_many, name='insert_many'),
     url(r'^update-one/$', views.update_one, name='update_one'),
+    url(r'^update-many-by-pattern/$', views.update_many_by_pattern, name='update_many_by_pattern'),
     url(r'^delete-one-by-pattern/$', views.delete_one_by_pattern, name='delete_one_by_pattern'),
     url(r'^delete-many-by-pattern/$', views.delete_many_by_pattern, name='delete_many_by_pattern'),
     #url(r'^file-upload2/(?P<filename>[^/]+)$', views.file_upload2, name='file_upload2'),
