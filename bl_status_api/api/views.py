@@ -579,10 +579,11 @@ def file_upload(request):
     data = db[collection].find_one({"pattern": pt })
     # print ("update data: " + json_util.dumps(data))
     if (data != "null"):
-        if ((data['currentPalletTagFile'] != "") and (data['currentPalletTagFile'] != " ") and (data['currentPalletWorksheetFile'] != "") and (data['currentPalletWorksheetFile'] != " ")): 
-            db[collection].update_many({"pattern": pt },{"$set":{"paperworkStatus": "Complete" }})
-        else:
-            db[collection].update_many({"pattern": pt },{"$set":{"paperworkStatus": "In Process" }})
+        if(data['paperworkStatus'] != "Issue"):
+            if ((data['currentPalletTagFile'] != "") and (data['currentPalletTagFile'] != " ") and (data['currentPalletWorksheetFile'] != "") and (data['currentPalletWorksheetFile'] != " ")): 
+                db[collection].update_many({"pattern": pt },{"$set":{"paperworkStatus": "Complete" }})
+            else:
+                db[collection].update_many({"pattern": pt },{"$set":{"paperworkStatus": "In Process" }})
 
     connection.close()
 
@@ -685,10 +686,11 @@ def file_delete(request):
     # update status document - Paperwork status
     data = db[collection].find_one({"pattern": pattern })
     if (data != "null"):
-        if ((data['currentPalletTagFile'] != "") and (data['currentPalletTagFile'] != " ") and (data['currentPalletWorksheetFile'] != "") and (data['currentPalletWorksheetFile'] != " ")): 
-            db[collection].update_many({"pattern": pattern },{"$set":{"paperworkStatus": "Complete" }})
-        else:
-            db[collection].update_many({"pattern": pattern },{"$set":{"paperworkStatus": "In Process" }})
+        if(data['paperworkStatus'] != "Issue"):
+            if ((data['currentPalletTagFile'] != "") and (data['currentPalletTagFile'] != " ") and (data['currentPalletWorksheetFile'] != "") and (data['currentPalletWorksheetFile'] != " ")): 
+                db[collection].update_many({"pattern": pattern },{"$set":{"paperworkStatus": "Complete" }})
+            else:
+                db[collection].update_many({"pattern": pattern },{"$set":{"paperworkStatus": "In Process" }})
     
     # remove metadata info from the file catalog
     db[file_cat_collection].delete_many({"pattern": pattern, "serverFilePath": file_name, "fileType": file_type})
