@@ -15,9 +15,9 @@ urlpatterns = [
     url(r'^update-many-by-pattern/$', views.update_many_by_pattern, name='update_many_by_pattern'),
     url(r'^delete-one-by-pattern/$', views.delete_one_by_pattern, name='delete_one_by_pattern'),
     url(r'^delete-many-by-pattern/$', views.delete_many_by_pattern, name='delete_many_by_pattern'),
-    #url(r'^file-upload2/(?P<filename>[^/]+)$', views.file_upload2, name='file_upload2'),
     url(r'^file-upload/$', views.file_upload, name='file_upload'),
     url(r'^file-delete/$', views.file_delete, name='file_delete'),
+    url(r'^file-download/$', views.file_download, name='file_download'),
     url(r'^logs/$', views.client_logs, name='client_logs'),
     url(r'^docs/', include('rest_framework_docs.urls')),
 ]

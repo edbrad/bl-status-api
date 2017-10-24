@@ -13,6 +13,7 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from bson import json_util
 from django.http import HttpResponse
+from django.conf import settings
 from bson.objectid import ObjectId # MongoDB native _id parsing support
 #
 import re # regular expression support
@@ -40,7 +41,7 @@ file_cat_collection = 'status_test_file_cat' # test file catalog collection (tab
 JWT_SECRET = "#ThisIsASecret!"  # private encryption key
 JWT_ALGORITHM = "HS256"         # encryption algorithm
 #JWT_EXP_DELTA_SECONDS = 3600    # token expiration time (in seconds)
-JWT_EXP_DELTA_SECONDS = 60    # token expiration time (in seconds)
+JWT_EXP_DELTA_SECONDS = 600    # token expiration time (in seconds)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -708,3 +709,60 @@ def file_delete(request):
         return Response(data)
 
     return Response(update_object.raw_result)
+
+# - define the PDF file download API endpoint
+@api_view(['POST'])
+def file_download(request):
+    """
+    Download a given pattern's associated PDF file from server repository 
+    and update status document 
+    """
+    logger.info("Request: file_download")
+    logger.info("File Download MetaData: " + json_util.dumps(request.POST))
+
+    # get the request body data (processing parameters)
+    try:
+        path = request.data['file']
+        pattern = request.data['pattern']
+        file_type = request.data['fileType']
+    except Exception as e:
+        print("file download - url error") 
+        data = [{"file download url error": str(e)}]
+        path = ""
+        pattern = ""
+        return Response(data)
+
+    # read the file from the folder and return it to the client
+    file_path = os.path.join("uploaded_files/", path)
+    print("file download - file_path: " + file_path) 
+    if os.path.exists(file_path):
+        # get file from the local filesystem
+        with open(file_path, 'rb') as fh:
+            # add the file to the http response
+            response = HttpResponse(fh.read(), content_type="application/pdf")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            print("file download - file path: " + file_path)
+            logger.info("file download - file path: " + file_path + "pattern: " + pattern)
+            # verify the db connection
+            try:
+                connection = MongoClient(mongo_server_connection)
+            except Exception as e:
+                data = [{"database error": str(e)}]
+                print("file download - database connection error: " + str(e))
+                logger.error("file - download database connection error: " + str(e))
+                return Response(data)
+            # update the file download count
+            db = connection[database]
+            if(file_type == "Pallet Tags"):
+                db[collection].update_many({"pattern": pattern },{"$inc":{"palletTagFileDownloadCount": 1}})
+                print("file download - updated Pallet Tag Download Count")
+                logger.info("file download - updated Pallet Tag Download Count - Pattern: " + pattern)
+            if(file_type == "Pallet Worksheet"):
+                db[collection].update_many({"pattern": pattern },{"$inc":{"palletWorksheetFileDownloadCount": 1}})
+                print("file download - updated Pallet Worksheet Download Count")
+                logger.info("file download - updated Pallet Worksheet Count - Pattern: " + pattern)
+            # close database connection
+            connection.close()
+            # return http response (w/ file data)
+            return response
+

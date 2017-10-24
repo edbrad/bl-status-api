@@ -20,11 +20,12 @@ try:
 except Exception as e:
     print("database error: " + e)
 
-# Find a user database with the matching username, verify password, & generate token
+# Update
 db = connection[database]
-#data = json_util.dumps(db[collection].update_many({},{"$set":{"currentPalletTagFile": " ","palletTagFileUploadDateTime": "","palletTagFileUser": " ","palletTagFileDownloadCount": 0}}))
-#db[collection].update_many({},{"$set":{"currentPalletWorksheetFile": " ","palletWorksheetFileUploadDateTime": "","palletWorksheetFileUser": " ","palletWorksheetFileDownloadCount": 0}})
-#db[collection].update_many({},{"$set":{"palletTagReplacementCount": 0, "palletWorksheetReplacementCount": 0}})
+db[collection].update_many({},{"$set":{"currentPalletTagFile": " ","palletTagFileUploadDateTime": "","palletTagFileUser": " ","palletTagFileDownloadCount": 0}})
+db[collection].update_many({},{"$set":{"currentPalletWorksheetFile": " ","palletWorksheetFileUploadDateTime": "","palletWorksheetFileUser": " ","palletWorksheetFileDownloadCount": 0}})
+db[collection].update_many({},{"$set":{"palletTagReplacementCount": 0, "palletWorksheetReplacementCount": 0}})
 db[collection].update_many({},{"$set":{"postalAccountingNotes": ""}})
+db[collection].update_many({},{"$set":{"sampleRoomNotes": ""}})
 
 connection.close()
