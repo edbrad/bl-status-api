@@ -19,5 +19,6 @@ urlpatterns = [
     url(r'^file-delete/$', views.file_delete, name='file_delete'),
     url(r'^file-download/$', views.file_download, name='file_download'),
     url(r'^logs/$', views.client_logs, name='client_logs'),
+    url(r'^log-view/$', views.log_view, name='log_view'),
     url(r'^docs/', include('rest_framework_docs.urls')),
 ]

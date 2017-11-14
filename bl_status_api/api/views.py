@@ -635,6 +635,8 @@ def client_logs(request):
     if (log_data != ""):
         # add the source IP address
         log_data["ipAddress"] = ip_address
+        # add time stamp
+        log_data["timeStamp"] = datetime.utcnow()
         # DB insert
         id = json_util.dumps(db[log_collection].insert_one(log_data).inserted_id)
     else:
@@ -648,7 +650,79 @@ def client_logs(request):
 
     return Response({'inserted_id': oid })
 
-# - define the PDF file delete API endpoint
+
+# Retrieve Log data for client app or server
+@api_view(['GET'])
+def log_view(request):
+    """
+    Retrieve Log data and return to client
+    """
+    logger.info("Request: log_view")
+    data = [{}] # JSON data array (query results)
+
+    # get parameters
+    try:
+        log_type = request.GET['logType']  # log type for
+    except Exception:
+        log_type = ""
+    
+    try:
+        start_date = request.GET['startDate']  # log start date range
+    except Exception:
+        start_date = ""
+
+    try:
+        end_date = request.GET['endDate']  # log end date range
+    except Exception:
+        end_date = ""
+    
+    # verify the connection
+    try:
+        connection = MongoClient(mongo_server_connection)
+    except Exception as e:
+        data = [{"database error": str(e)}]
+        return Response(data)
+    
+    # get log data and return it
+    db = connection[database]
+    if ((log_type != "") and (start_date != "") and (end_date != "")):
+        # convert incoming date range to date/time format
+        dt_start = datetime.strptime(start_date,"%m/%d/%y")
+        dt_end = datetime.strptime(end_date,"%m/%d/%y")
+
+        # get client application log
+        if(log_type == "app"):
+            # prepare for date range query
+            s_year = dt_start.year
+            s_month = dt_start.month
+            s_day = dt_start.day
+            #
+            e_year = dt_end.year
+            e_month = dt_end.month
+            e_day = dt_end.day
+            #
+            qry_start_date = datetime(s_year, s_month, s_day)
+            qry_end_date = datetime(e_year, e_month, e_day)
+            qry_end_date = qry_end_date + timedelta(days=1)
+
+            # query database
+            data = json_util.dumps(db[log_collection].find({ "timeStamp": {'$gte': qry_start_date,'$lt': qry_end_date}}).sort("timeStamp", -1))
+
+        # get server log
+        if(log_type == "server"):
+            data = [{"server data": "coming soon!"}]
+
+        # close database connection and return data to client    
+        connection.close()
+        return HttpResponse(data, content_type='application/json')
+
+    # invalid parms - return emtpy array
+    else:
+        data = [{}]
+        connection.close()
+        return HttpResponse(data, content_type='application/json')
+
+# Delete PDF file for a given pattern & update status
 @api_view(['POST'])
 def file_delete(request):
     """
