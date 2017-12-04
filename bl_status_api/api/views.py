@@ -20,6 +20,8 @@ import re # regular expression support
 import ast # literal evaluation support (e.g. string to dictionary)
 #
 from datetime import datetime, timedelta
+import pytz
+from bson.codec_options import CodecOptions
 from passlib.hash import pbkdf2_sha256
 from bson import json_util
 import jwt
@@ -636,7 +638,9 @@ def client_logs(request):
         # add the source IP address
         log_data["ipAddress"] = ip_address
         # add time stamp
-        log_data["timeStamp"] = datetime.utcnow()
+        central_time = pytz.timezone('US/Central')
+        tz_aware_datetime = central_time.localize(datetime.utcnow())
+        log_data["timeStamp"] = tz_aware_datetime
         # DB insert
         id = json_util.dumps(db[log_collection].insert_one(log_data).inserted_id)
     else:
@@ -692,7 +696,7 @@ def log_view(request):
 
         # get client application log
         if(log_type == "app"):
-            # prepare for date range query
+            # prepare for date range query (w/ timezone)
             s_year = dt_start.year
             s_month = dt_start.month
             s_day = dt_start.day
@@ -702,11 +706,17 @@ def log_view(request):
             e_day = dt_end.day
             #
             qry_start_date = datetime(s_year, s_month, s_day)
+            qry_start_date = qry_start_date.replace(tzinfo=pytz.timezone('US/Central'))
             qry_end_date = datetime(e_year, e_month, e_day)
             qry_end_date = qry_end_date + timedelta(days=1)
+            qry_end_date = qry_end_date.replace(tzinfo=pytz.timezone('US/Central'))
 
-            # query database
-            data = json_util.dumps(db[log_collection].find({ "timeStamp": {'$gte': qry_start_date,'$lt': qry_end_date}}).sort("timeStamp", -1))
+            #print("start date: " + qry_start_date.strftime("%B %d, %Y, %H:%M:%S"))
+            #print("end_date: " + qry_end_date.strftime("%B %d, %Y, %H:%M:%S"))
+
+            # query database (apply timezone options)
+            tz_aware_logs = db[log_collection].with_options(codec_options=CodecOptions(tz_aware=True,tzinfo=pytz.timezone('US/Central')))
+            data = json_util.dumps(tz_aware_logs.find({ '$and': [{'timeStamp': {'$gte': qry_start_date}}, {'timeStamp': {'$lt': qry_end_date}}]}).sort("timeStamp", -1))
 
         # get server log
         if(log_type == "server"):
